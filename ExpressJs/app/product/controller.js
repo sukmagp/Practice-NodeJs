@@ -3,6 +3,7 @@ const fs = require ('fs');
 const path = require ('path');
 
 
+// Search Data
 const index = (req, res) => {
     const {search} = req.query;
     let exec = {};
@@ -19,6 +20,7 @@ const index = (req, res) => {
     connection.query(exec, _response(res));
 }
 
+// Read Data
 const view = (req, res) => {
     connection.query({
         sql: 'SELECT * FROM product WHERE id = ?',
@@ -26,11 +28,20 @@ const view = (req, res) => {
     }, _response(res));
 }
 
+// Delete Data
+const destroy = (req, res) => {
+    connection.query({
+        sql: 'DELETE FROM product WHERE id = ?',
+        values: [req.params.id]
+    }, _response(res));
+}
+
+// Creat Data
 const store = (req, res) => {
     const {users_id, name, price, stock, status} = req.body;
     const image = req.file;
     if(image) {
-        const target = path.join(__dirname, '../../uploads', image.originalname);
+        const target = path.join(__dirname, '../../uploads', image.filename + '-' + image.originalname);
         fs.renameSync(image.path, target);
         connection.query({
             sql: 'INSERT INTO product (users_id, name, price, stock, status, image_url) VALUES (?, ?, ?, ?, ?, ?)',
@@ -39,13 +50,14 @@ const store = (req, res) => {
     };
 };
 
+// Update Data
 const update = (req, res) => {
     const {users_id, name, price, stock, status} = req.body;
     const image = req.file;
     let sql = '';
     let values = [];
     if(image) {
-        const target = path.join(__dirname, '../../uploads', image.originalname);
+        const target = path.join(__dirname, '../../uploads', image.filename + '-' + image.originalname);
         fs.renameSync(image.path, target);
         sql = 'UPDATE product SET users_id = ?, name = ?, price = ?, stock = ?, status = ?, image_url = ? WHERE id = ?';
         values = [parseInt(users_id), name, price, stock, status, `http://localhost:3030/public/${image.originalname}`, req.params.id]
@@ -77,5 +89,6 @@ module.exports = {
     index,
     view,
     store,
-    update
+    update,
+    destroy
 }

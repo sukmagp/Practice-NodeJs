@@ -8,12 +8,12 @@ const index = (req, res) => {
     let query = {};
     if(search) {
         exec = {
-            sql: 'SELECT * FROM product_v2 WHERE name LIKE ?',
+            sql: 'SELECT * FROM products WHERE name LIKE ?',
             values: [`%${search}%`]
         }
     }else {
         exec = {
-            sql: 'SELECT * FROM product_v2'
+            sql: 'SELECT * FROM products'
         }
     }
     connection.query(exec, _response(res));
@@ -21,7 +21,7 @@ const index = (req, res) => {
 
 const view = (req, res) => {
     connection.query({
-        sql: 'SELECT * FROM product_v2 WHERE id = ?',
+        sql: 'SELECT * FROM products WHERE id = ?',
         values : [req.params.id]
     }, _response(res));
 };
@@ -30,7 +30,7 @@ const store = async (req, res) => {
     const {users_id, name, price, stock, status} = req.body;
     const image = req.file;
     if(image) {
-        const target = path.join(__dirname, '../../uploads', image.originalname);
+        const target = path.join(__dirname, '../../uploads', image.filename + '-' + image.originalname);
         fs.renameSync(image.path, target);
         try {
             await Product.sync();
@@ -48,12 +48,12 @@ const update = (req, res) => {
     let sql = '';
     let values = [];
     if(image) {
-        const target = path.join(__dirname, '../../uploads', image.originalname);
+        const target = path.join(__dirname, '../../uploads', image.filename + '-' + image.originalname);
         fs.renameSync(image.path, target);
-        sql = 'UPDATE product_v2 SET users_id = ?, name = ?, price = ?, stock = ?, status = ?, image_url = ? WHERE id = ?';
+        sql = 'UPDATE products SET users_id = ?, name = ?, price = ?, stock = ?, status = ?, image_url = ? WHERE id = ?';
         values = [parseInt(users_id), name, price, stock, status, `http://localhost:3030/public/${image.originalname}`, req.params.id]
     }else {
-        sql = 'UPDATE product_v2 SET users_id = ?, name = ?, price = ?, stock = ?, status = ? WHERE id = ?'
+        sql = 'UPDATE products SET users_id = ?, name = ?, price = ?, stock = ?, status = ? WHERE id = ?'
         values = [parseInt(users_id), name, price, stock, status, req.params.id]
     }
 
@@ -62,7 +62,7 @@ const update = (req, res) => {
 
 const destroy = (req, res) => {
     connection.query({
-        sql: 'DELETE FROM product_v2 WHERE id = ?',
+        sql: 'DELETE FROM products WHERE id = ?',
         values : [req.params.id]
     }, _response(res));
 };

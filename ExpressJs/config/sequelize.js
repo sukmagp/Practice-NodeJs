@@ -8,7 +8,7 @@ const sequelize = new Sequelize({
     dialect: 'mysql'
 });
 
-// Check connection
+// Checking connection
 (async () => {
     try {
         await sequelize.authenticate();
